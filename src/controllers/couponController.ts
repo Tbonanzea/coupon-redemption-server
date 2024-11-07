@@ -10,7 +10,7 @@ export const generateCoupon: RequestHandler = async (
 		const userId = req.query.userId || req.body.userId;
 
 		if (typeof userId !== 'string' && typeof userId !== 'undefined') {
-			return next({ status: 400, message: 'Invalid user ID format' });
+			return next({ status: 400, message: 'Invalid user ID format, has to be a string' });
 		}
 
 		const coupon = await couponService.generateCoupon(userId);
