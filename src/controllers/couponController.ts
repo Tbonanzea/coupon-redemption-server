@@ -1,81 +1,73 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import couponService from '../services/couponService';
 
-export const generateCoupon = async (
+export const generateCoupon: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-): Promise<Response | void> => {
+): Promise<void> => {
 	try {
 		const userId = req.query.userId || req.body.userId;
 
+		if (typeof userId !== 'string' && typeof userId !== 'undefined') {
+			return next({ status: 400, message: 'Invalid user ID format' });
+		}
+
 		const coupon = await couponService.generateCoupon(userId);
 
-		return res.status(200).json({ coupon });
+		res.status(200).json({ coupon });
 	} catch (error) {
-		if (error instanceof Error) {
-			next({ message: error.message });
-		} else {
-			next({ message: 'An unknown error occurred' });
-		}
+		next(error);
 	}
 };
 
-export const assignCoupon = async (
+export const assignCoupon: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-): Promise<Response | void> => {
+): Promise<void> => {
 	const userId = req.query.userId || req.body.userId;
 	const code = req.query.code || req.body.code;
+	if (!userId || !code) {
+		next({ status: 400, message: 'User ID and code are required' });
+	}
+
 	try {
 		await couponService.assignCoupon(userId, code);
-		return res
-			.status(200)
-			.json({ message: 'Coupon assigned successfully' });
+		res.status(200).json({ message: 'Coupon assigned successfully' });
 	} catch (error) {
-		if (error instanceof Error) {
-			next({ message: error.message });
-		} else {
-			next({ message: 'An unknown error occurred' });
-		}
+		next(error);
 	}
 };
 
-export const applyCoupon = async (
+export const applyCoupon: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-): Promise<Response | void> => {
+): Promise<void> => {
 	const { userId, code } = req.body;
+	if (!userId || !code) {
+		next({ status: 400, message: 'User ID and code are required' });
+	}
+
 	try {
 		const discount = await couponService.applyCoupon(userId, code);
-		return res.status(200).json({ discount });
+		res.status(200).json({ discount });
 	} catch (error) {
-		if (error instanceof Error) {
-			next({ message: error.message });
-		} else {
-			next({ message: 'An unknown error occurred' });
-		}
+		next(error);
 	}
 };
 
-export const redeemCoupon = async (
+export const redeemCoupon: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-): Promise<Response | void> => {
+): Promise<void> => {
 	const { userId, code } = req.body;
 	try {
 		await couponService.redeemCoupon(userId, code);
-		return res
-			.status(200)
-			.json({ message: 'Coupon redeemed successfully' });
+		res.status(200).json({ message: 'Coupon redeemed successfully' });
 	} catch (error) {
-		if (error instanceof Error) {
-			next({ message: error.message });
-		} else {
-			next({ message: 'An unknown error occurred' });
-		}
+		next(error);
 	}
 };

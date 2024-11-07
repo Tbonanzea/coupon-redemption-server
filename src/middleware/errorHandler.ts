@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
-// Custom error handler middleware
-export const errorHandler = (err: any, req: Request, res: Response) => {
+export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
 	const statusCode = err.status || 500; // Default to 500 if status is not defined
 	const message = err.message || 'Internal Server Error';
 
