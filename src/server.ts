@@ -3,7 +3,7 @@ import sequelize from './config/db';
 import Coupon from './models/Coupon';
 import User from './models/User';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 sequelize
 	.sync({ force: true, alter: true })

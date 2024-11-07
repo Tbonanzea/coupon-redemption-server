@@ -1,6 +1,7 @@
 import Coupon from '../models/Coupon';
 import User from '../models/User';
 import { generateCouponCode } from '../utils/genarateCouponCode';
+const { Op } = require('sequelize');
 
 const generateCoupon = async (userId: string | undefined): Promise<Coupon> => {
 	const coupon = new Coupon();
@@ -21,19 +22,27 @@ const generateCoupon = async (userId: string | undefined): Promise<Coupon> => {
 	return coupon;
 };
 
-const assignCoupon = async (userId: number, code: string) => {
-	const coupon = await Coupon.findOne({ where: { code } });
-	if (!coupon) {
-		throw new Error('Coupon not found');
-	}
-
+const assignCoupon = async (userId: number) => {
 	const user = await User.findByPk(userId);
 	if (!user) {
 		throw new Error('User not found');
 	}
 
+	// Assign random coupon that has not been assigned or redeemed yet
+	const coupon = await Coupon.findOne({
+		where: {
+			userId: { [Op.is]: null },
+			isRedeemed: false,
+		},
+	});
+
+	if (!coupon) {
+		throw new Error('No coupons available');
+	}
 	coupon.userId = userId;
 	await coupon.save();
+
+	return coupon.code;
 };
 
 const applyCoupon = async (userId: number, code: string): Promise<number> => {
@@ -62,6 +71,8 @@ const redeemCoupon = async (userId: number, code: string) => {
 	}
 
 	coupon.isRedeemed = true;
+	coupon.userId = null;
+
 	await coupon.save();
 };
 

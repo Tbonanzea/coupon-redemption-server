@@ -6,7 +6,7 @@ interface CouponAttributes {
 	code: string;
 	discount: number;
 	isRedeemed: boolean;
-	userId: number; // Define userId here
+	userId: number | null;
 }
 
 // Optional fields for creation (if any are optional)
@@ -20,7 +20,7 @@ class Coupon
 	public code!: string;
 	public discount!: number;
 	public isRedeemed!: boolean;
-	public userId!: number;
+	public userId!: number | null;
 
 	// Timestamps
 	public readonly createdAt!: Date;

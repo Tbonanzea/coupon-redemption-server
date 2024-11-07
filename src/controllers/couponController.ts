@@ -10,7 +10,10 @@ export const generateCoupon: RequestHandler = async (
 		const userId = req.query.userId || req.body.userId;
 
 		if (typeof userId !== 'string' && typeof userId !== 'undefined') {
-			return next({ status: 400, message: 'Invalid user ID format, has to be a string' });
+			return next({
+				status: 400,
+				message: 'Invalid user ID format, has to be a string',
+			});
 		}
 
 		const coupon = await couponService.generateCoupon(userId);
@@ -27,14 +30,13 @@ export const assignCoupon: RequestHandler = async (
 	next: NextFunction
 ): Promise<void> => {
 	const userId = req.query.userId || req.body.userId;
-	const code = req.query.code || req.body.code;
-	if (!userId || !code) {
-		next({ status: 400, message: 'User ID and code are required' });
+	if (!userId) {
+		next({ status: 400, message: 'User ID  required' });
 	}
 
 	try {
-		await couponService.assignCoupon(userId, code);
-		res.status(200).json({ message: 'Coupon assigned successfully' });
+		const couponCode = await couponService.assignCoupon(userId);
+		res.status(200).json({ couponCode });
 	} catch (error) {
 		next(error);
 	}
@@ -46,13 +48,18 @@ export const applyCoupon: RequestHandler = async (
 	next: NextFunction
 ): Promise<void> => {
 	const { userId, code } = req.body;
+
 	if (!userId || !code) {
-		next({ status: 400, message: 'User ID and code are required' });
+		// Respond with JSON error if userId or code is missing
+		res.status(400).json({
+			success: false,
+			message: 'User ID and code are required',
+		});
 	}
 
 	try {
 		const discount = await couponService.applyCoupon(userId, code);
-		res.status(200).json({ discount });
+		res.status(200).json({ success: true, discount });
 	} catch (error) {
 		next(error);
 	}
