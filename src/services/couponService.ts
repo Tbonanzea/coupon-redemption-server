@@ -2,25 +2,38 @@ import Coupon from '../models/Coupon';
 import User from '../models/User';
 import { generateCouponCode } from '../utils/genarateCouponCode';
 
-const generateCoupon = async (userId: string): Promise<Coupon> => {
+const generateCoupon = async (userId: string | undefined): Promise<Coupon> => {
 	const coupon = new Coupon();
 	coupon.code = generateCouponCode();
 	const possibleDiscounts = [5, 10, 15, 20, 25];
 	coupon.discount =
 		possibleDiscounts[Math.floor(Math.random() * possibleDiscounts.length)]; // Random discount
-	coupon.userId = parseInt(userId);
+
+	if (userId) {
+		const user = await User.findByPk(parseInt(userId));
+		if (!user) {
+			throw new Error('User not found');
+		}
+		coupon.userId = parseInt(userId);
+	}
+
 	await coupon.save();
 	return coupon;
 };
 
-const getCouponByUser = async (userId: number): Promise<Coupon | null> => {
+const assignCoupon = async (userId: number, code: string) => {
+	const coupon = await Coupon.findOne({ where: { code } });
+	if (!coupon) {
+		throw new Error('Coupon not found');
+	}
+
 	const user = await User.findByPk(userId);
 	if (!user) {
 		throw new Error('User not found');
 	}
 
-	const coupon = await Coupon.findOne({ where: { userId } });
-	return coupon;
+	coupon.userId = userId;
+	await coupon.save();
 };
 
 const applyCoupon = async (userId: number, code: string): Promise<number> => {
@@ -52,4 +65,4 @@ const redeemCoupon = async (userId: number, code: string) => {
 	await coupon.save();
 };
 
-export default { applyCoupon, redeemCoupon, generateCoupon, getCouponByUser };
+export default { applyCoupon, redeemCoupon, generateCoupon, assignCoupon };

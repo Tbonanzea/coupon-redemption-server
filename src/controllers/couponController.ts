@@ -8,38 +8,37 @@ export const generateCoupon = async (
 ): Promise<Response | void> => {
 	try {
 		const userId = req.query.userId || req.body.userId;
-		if (!userId) {
-			return res
-				.status(400)
-				.json({ error: 'User ID is required to generate a coupon' });
-		}
 
 		const coupon = await couponService.generateCoupon(userId);
-        
+
 		return res.status(200).json({ coupon });
 	} catch (error) {
 		if (error instanceof Error) {
-			next({ error: error.message });
+			next({ message: error.message });
 		} else {
-			next({ error: 'An unknown error occurred' });
+			next({ message: 'An unknown error occurred' });
 		}
 	}
 };
 
-export const getCouponByUser = async (
+export const assignCoupon = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ): Promise<Response | void> => {
-	const { userId } = req.body;
+	const userId = req.query.userId || req.body.userId;
+	const code = req.query.code || req.body.code;
 	try {
-		const coupon = await couponService.getCouponByUser(userId);
-		return res.status(200).json({ coupon });
+		await couponService.assignCoupon(userId, code);
+		return res
+			.status(200)
+			.json({ message: 'Coupon assigned successfully' });
 	} catch (error) {
 		if (error instanceof Error) {
-			next({ error: error.message });
+			next({ message: error.message });
+		} else {
+			next({ message: 'An unknown error occurred' });
 		}
-		next({ error: 'An unknown error occurred' });
 	}
 };
 
@@ -54,9 +53,10 @@ export const applyCoupon = async (
 		return res.status(200).json({ discount });
 	} catch (error) {
 		if (error instanceof Error) {
-			next({ error: error.message });
+			next({ message: error.message });
+		} else {
+			next({ message: 'An unknown error occurred' });
 		}
-		next({ error: 'An unknown error occurred' });
 	}
 };
 
@@ -73,8 +73,9 @@ export const redeemCoupon = async (
 			.json({ message: 'Coupon redeemed successfully' });
 	} catch (error) {
 		if (error instanceof Error) {
-			next({ error: error.message });
+			next({ message: error.message });
+		} else {
+			next({ message: 'An unknown error occurred' });
 		}
-		next({ error: 'An unknown error occurred' });
 	}
 };

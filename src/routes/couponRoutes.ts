@@ -3,15 +3,18 @@ import {
 	applyCoupon,
 	redeemCoupon,
 	generateCoupon,
-	getCouponByUser,
+	assignCoupon,
 } from '../controllers/couponController';
 import { asyncHandler } from '../utils/asyncHandler';
+import { methodNotAllowed } from '../middleware/methodNotAllowed';
 
 const router = express.Router();
 
 router.get('/generate-coupon', asyncHandler(generateCoupon));
-router.get('/get-coupon-by-user', asyncHandler(getCouponByUser));
+router.get('/assign-coupon', asyncHandler(assignCoupon));
 router.post('/apply', asyncHandler(applyCoupon));
 router.post('/redeem', asyncHandler(redeemCoupon));
+
+router.all('*', methodNotAllowed);
 
 export default router;
